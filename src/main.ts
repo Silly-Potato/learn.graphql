@@ -32,6 +32,7 @@ type Mutation {
     register(firstName: String!, lastName: String, email:String!, password: String): User
     createPost(user_id: Int!, content: String!): Post
     createComment(user_id: Int!, post_id: Int!, content: String!): Post
+    updatePost(id: Int!, content: String!): Post
 }
 `;
 
@@ -47,7 +48,6 @@ function mylog(msg: String) {
     console.log("-----------------------------------------")
     console.log(msg);
 }
-
 
 function queryById(array, id: number) {
     for (var i: number = 0; i < array.length; i++) {
@@ -105,7 +105,7 @@ function mutationCreatePost(user_id: number, content: String) {
         console.log(`Could not create post, user undefined`);
         return undefined;
     }
-    var today = new Date().toLocaleString()
+    var today = new Date().toLocaleString();
     var post = {
         id: generateId(),
         author: user,
@@ -127,10 +127,18 @@ function mutationCreateComment(user_id: number, post_id: number, content: String
     if (comment == undefined) {
         return undefined;
     }
-    console.log(comment)
-    console.log(post)
     post.comments.push(comment);
     return comment;
+}
+
+function mutationUpdatePost(id: number, content: String) {
+    var post = queryPostById(id);
+    if (post == undefined) {
+        return undefined;
+    }
+    post.content = content;
+    post.updatedAt = new Date().toLocaleString();
+    return post;
 }
 
 const resolvers = {
@@ -171,6 +179,10 @@ const resolvers = {
         createComment: (_, {user_id, post_id, content}) => {
             mylog(`Mutation create comment by user with id: \"${user_id}\" on post with id: \"${post_id}\"`);
             return mutationCreateComment(user_id, post_id, content);
+        },
+        updatePost: (_, {id, content}) => {
+            mylog(`Mutation update post with id: \h${id}\"`);
+            return mutationUpdatePost(id, content);
         }
     }
 };
