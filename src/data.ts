@@ -1,4 +1,4 @@
-let users = [
+let users: Object = [
     {
         id: 1,
         email: "jerry@mail.com",
@@ -8,7 +8,7 @@ let users = [
     }
 ];
 
-let posts = [
+let posts: Object = [
     {
         id: 1,
         author: "Jerry",
