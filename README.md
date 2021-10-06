@@ -1,6 +1,7 @@
 # learn.graphql
 # compile with
-tsc
+### tsc
+### tsc -p ./tsconfig
 
 # run with
-node ./js/main.js
+### node ./js/main.js
