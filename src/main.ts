@@ -1,5 +1,7 @@
-const {ApolloServer, gql} = require('apollo-server')
-const {users, posts} = require('./data')
+import { findBreakingChanges } from "graphql";
+
+const { ApolloServer, gql } = require('apollo-server')
+const { users, posts } = require('./data')
 
 const typeDefs = gql`
 type User {
@@ -33,10 +35,11 @@ type Mutation {
     createPost(user_id: Int!, content: String!): Post
     createComment(user_id: Int!, post_id: Int!, content: String!): Post
     updatePost(id: Int!, content: String!): Post
+    deletePost(id: Int!): Boolean
 }
 `;
 
-var id_counter = 0
+var id_counter: number = 0
 
 function generateId() {
     id_counter++;
@@ -66,7 +69,7 @@ function queryUserById(id: number) {
 function queryPostById(id: number) {
     return queryById(posts, id)
 }
-    
+
 function queryCommentsFromPost(id: number) {
     var post = queryPostById(id);
     if (post != undefined) {
@@ -77,7 +80,7 @@ function queryCommentsFromPost(id: number) {
 
 function queryCommentById(post_id: number, comment_id: number) {
     var post = queryPostById(post_id);
-    return queryById(post, comment_id);
+    return queryById(post.comments, comment_id);
 }
 
 function mutationRegister(firstName: String, lastName: String, email: String, password: String) {
@@ -138,7 +141,38 @@ function mutationUpdatePost(id: number, content: String) {
     }
     post.content = content;
     post.updatedAt = new Date().toLocaleString();
+    //update comments as well
+    for (var i: number = 0; i < posts.length; i++) {
+        var found = queryById(post[i].comments, post.id)
+        if (found != undefined) {
+            found = post;
+        }
+    }
     return post;
+}
+
+function mutationDeletePost(id: number) {
+    var post = queryPostById(id)
+    if (post == undefined) {
+        return false
+    }
+    var found = false
+    for (var i: number = 0; i < posts.length; i++) {
+        //delete post in comments
+        post = posts[i];
+        for (var j: number = 0; j < post.comments.length && !found; j++) {
+            if (post.comments[j].id == id) {
+                post.comments.splice(j, 1)
+                found = true;
+            }
+        }
+        //delete in post in posts
+        console.log(`${post.id}`)
+        if (post.id == id) {
+            posts.splice(i, 1)
+        }
+    }
+    return true
 }
 
 const resolvers = {
@@ -147,47 +181,52 @@ const resolvers = {
             mylog(`Query all users`)
             return users;
         },
-        user: (_, {id}) => {
+        user: (_, { id }) => {
             mylog(`Query user with id: \"${id}\"`);
             return queryUserById(id);
         },
-        posts: () =>  {
+        posts: () => {
             mylog(`Query all posts`)
             return posts;
         },
-        post: (_, {id}) => { 
+        post: (_, { id }) => {
             mylog(`Query post with id: \"${id}\"`);
             return queryPostById(id);
         },
-        comments: (_, {post_id}) => { 
+        comments: (_, { post_id }) => {
             mylog(`Query comments from post with id: \"${post_id}\"`);
             return queryCommentsFromPost(post_id);
         },
-        comment: (_, {post_id, comment_id}) => {
+        comment: (_, { post_id, comment_id }) => {
             mylog(`Query comment with id: ${comment_id}, in post with id: \"${post_id}\"`)
-            return queryCommentById(post_id, comment_id); }
+            return queryCommentById(post_id, comment_id);
+        }
     },
     Mutation: {
-        register: (_, {firstName, lastName, email, password}) => {
+        register: (_, { firstName, lastName, email, password }) => {
             mylog(`Mutation register user with email: \"${email}\"`)
             return mutationRegister(firstName, lastName, email, password);
         },
-        createPost: (_, {user_id, content}) => {
+        createPost: (_, { user_id, content }) => {
             mylog(`Mutation create post by user with id: \"${user_id}\"`);
             return mutationCreatePost(user_id, content);
         },
-        createComment: (_, {user_id, post_id, content}) => {
+        createComment: (_, { user_id, post_id, content }) => {
             mylog(`Mutation create comment by user with id: \"${user_id}\" on post with id: \"${post_id}\"`);
             return mutationCreateComment(user_id, post_id, content);
         },
-        updatePost: (_, {id, content}) => {
-            mylog(`Mutation update post with id: \h${id}\"`);
+        updatePost: (_, { id, content }) => {
+            mylog(`Mutation update post with id: \"${id}\"`);
             return mutationUpdatePost(id, content);
+        },
+        deletePost: (_, { id }) => {
+            mylog(`Mutation delete post with id: \"${id}\"`)
+            return mutationDeletePost(id);
         }
     }
 };
 
-const server = new ApolloServer({typeDefs, resolvers})
+const server = new ApolloServer({ typeDefs, resolvers })
 server.listen().then(({ url }) => {
     id_counter = users.length + posts.length;
     console.log(`Server ready at ${url}`);
