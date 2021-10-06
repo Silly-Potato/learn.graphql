@@ -10,8 +10,8 @@ let users: Object = [
 
 let posts: Object = [
     {
-        id: 1,
-        author: "Jerry",
+        id: 2,
+        author: users[0],
         comments: [],
         content: "I am Jerry",
         createdAt: "11:07:23_06/10/2021",

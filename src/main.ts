@@ -27,7 +27,19 @@ type Query {
     comments(post_id: Int!): [Post]
     comment(post_id: Int!, comment_id: Int!): Post
 }
+
+type Mutation {
+    register(firstName: String!, lastName: String, email:String!, password: String): User
+}
 `;
+
+var id_counter = 0
+
+function generateId() {
+    id_counter++;
+    console.log(`Generated new id: ${id_counter}`)
+    return (id_counter);
+}
 
 function queryById(array, id: number) {
     for (var i: number = 0; i < array.length; i++) {
@@ -41,12 +53,10 @@ function queryById(array, id: number) {
 }
 
 function queryUserById(id: number) {
-    console.log(`Query user with id: ${id}`);
     return queryById(users, id)
 }
 
 function queryPostById(id: number) {
-    console.log(`Query post with id: ${id}`);
     return queryById(posts, id)
 }
     
@@ -63,18 +73,60 @@ function queryCommentById(post_id: number, comment_id: number) {
     return queryById(post, comment_id);
 }
 
+function mutationRegister(firstName: String, lastName: String, email: String, password: String) {
+    //check if email already in use
+    for (var i: number = 0; i < users.length; i++) {
+        if (users[i].email == email) {
+            console.log(`Email already in use: \"${email}\"`)
+            return undefined;
+        }
+    }
+    var user = {
+        id: generateId(),
+        email: email,
+        firstName: firstName,
+        lastName: lastName
+    };
+    users.push(user)
+    return user;
+}
+
 const resolvers = {
     Query: {
-        users: () => users,
-        user: (_, {id}) => { return queryUserById(id); },
-        posts: () => posts,
-        post: (_, {id}) => { return queryPostById(id); },
-        comments: (_, {post_id}) => { return queryCommentsFromPost(post_id); },
-        comment: (_, {post_id, comment_id}) => { return queryCommentById(post_id, comment_id); }
+        users: () => {
+            console.log(`Query all users`)
+            return users;
+        },
+        user: (_, {id}) => {
+            console.log(`Query user with id: \"${id}\"`);
+            return queryUserById(id);
+        },
+        posts: () =>  {
+            console.log(`Query all posts`)
+            return posts;
+        },
+        post: (_, {id}) => { 
+            console.log(`Query post with id: \"${id}\"`);
+            return queryPostById(id);
+        },
+        comments: (_, {post_id}) => { 
+            console.log(`Query comments from post with id: \"${post_id}\"`);
+            return queryCommentsFromPost(post_id);
+        },
+        comment: (_, {post_id, comment_id}) => {
+            console.log(`Query comment with id: ${comment_id}, in post with id: \"${post_id}\"`)
+            return queryCommentById(post_id, comment_id); }
+    },
+    Mutation: {
+        register: (_, {firstName, lastName, email, password}) => {
+            console.log(`Mutation register user with email: \"${email}\"`)
+            return mutationRegister(firstName, lastName, email, password);
+        }
     }
 };
 
 const server = new ApolloServer({typeDefs, resolvers})
 server.listen().then(({ url }) => {
+    id_counter = users.length + posts.length;
     console.log(`Server ready at ${url}`);
 });
