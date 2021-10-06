@@ -4,7 +4,7 @@ var __makeTemplateObject = (this && this.__makeTemplateObject) || function (cook
 };
 var _a = require('apollo-server'), ApolloServer = _a.ApolloServer, gql = _a.gql;
 var _b = require('./data'), users = _b.users, posts = _b.posts;
-var typeDefs = gql(__makeTemplateObject(["\ntype User {\n    id: Int\n    email: String\n    password: String\n    firstName: String\n    lastName: String\n}\n\ntype Post {\n    id: Int\n    author: User\n    comments: Post\n    content: String\n    createdAt: String\n    updatedAt: String\n}\n\ntype Query {\n    users: [User]\n    user(id: Int!): User\n    posts: [Post]\n    post(id: Int!): Post\n    comments(post_id: Int!): [Post]\n    comment(post_id: Int!, comment_id: Int!): Post\n}\n\ntype Mutation {\n    register(firstName: String!, lastName: String, email:String!, password: String): User\n}\n"], ["\ntype User {\n    id: Int\n    email: String\n    password: String\n    firstName: String\n    lastName: String\n}\n\ntype Post {\n    id: Int\n    author: User\n    comments: Post\n    content: String\n    createdAt: String\n    updatedAt: String\n}\n\ntype Query {\n    users: [User]\n    user(id: Int!): User\n    posts: [Post]\n    post(id: Int!): Post\n    comments(post_id: Int!): [Post]\n    comment(post_id: Int!, comment_id: Int!): Post\n}\n\ntype Mutation {\n    register(firstName: String!, lastName: String, email:String!, password: String): User\n}\n"]));
+var typeDefs = gql(__makeTemplateObject(["\ntype User {\n    id: Int\n    email: String\n    password: String\n    firstName: String\n    lastName: String\n}\n\ntype Post {\n    id: Int\n    author: User\n    comments: Post\n    content: String\n    createdAt: String\n    updatedAt: String\n}\n\ntype Query {\n    users: [User]\n    user(id: Int!): User\n    posts: [Post]\n    post(id: Int!): Post\n    comments(post_id: Int!): [Post]\n    comment(post_id: Int!, comment_id: Int!): Post\n}\n\ntype Mutation {\n    register(firstName: String!, lastName: String, email:String!, password: String): User\n    createPost(user_id: Int!, content: String!): Post\n}\n"], ["\ntype User {\n    id: Int\n    email: String\n    password: String\n    firstName: String\n    lastName: String\n}\n\ntype Post {\n    id: Int\n    author: User\n    comments: Post\n    content: String\n    createdAt: String\n    updatedAt: String\n}\n\ntype Query {\n    users: [User]\n    user(id: Int!): User\n    posts: [Post]\n    post(id: Int!): Post\n    comments(post_id: Int!): [Post]\n    comment(post_id: Int!, comment_id: Int!): Post\n}\n\ntype Mutation {\n    register(firstName: String!, lastName: String, email:String!, password: String): User\n    createPost(user_id: Int!, content: String!): Post\n}\n"]));
 var id_counter = 0;
 function generateId() {
     id_counter++;
@@ -49,10 +49,29 @@ function mutationRegister(firstName, lastName, email, password) {
         id: generateId(),
         email: email,
         firstName: firstName,
-        lastName: lastName
+        lastName: lastName,
+        password: password
     };
     users.push(user);
     return user;
+}
+function mutationCreatePost(user_id, content) {
+    var user = queryUserById(user_id);
+    if (user == undefined) {
+        console.log("Could not create post, user undefined");
+        return undefined;
+    }
+    var today = new Date().toLocaleString();
+    var post = {
+        id: generateId(),
+        author: user,
+        comments: [],
+        content: content,
+        createdAt: today,
+        updatedAt: today
+    };
+    posts.push(post);
+    return post;
 }
 var resolvers = {
     Query: {
@@ -90,6 +109,11 @@ var resolvers = {
             var firstName = _a.firstName, lastName = _a.lastName, email = _a.email, password = _a.password;
             console.log("Mutation register user with email: \"" + email + "\"");
             return mutationRegister(firstName, lastName, email, password);
+        },
+        createPost: function (_, _a) {
+            var user_id = _a.user_id, content = _a.content;
+            console.log("Mutation create post by user with id: \"" + user_id + "\"");
+            return mutationCreatePost(user_id, content);
         }
     }
 };

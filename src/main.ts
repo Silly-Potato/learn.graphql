@@ -30,6 +30,7 @@ type Query {
 
 type Mutation {
     register(firstName: String!, lastName: String, email:String!, password: String): User
+    createPost(user_id: Int!, content: String!): Post
 }
 `;
 
@@ -85,10 +86,30 @@ function mutationRegister(firstName: String, lastName: String, email: String, pa
         id: generateId(),
         email: email,
         firstName: firstName,
-        lastName: lastName
+        lastName: lastName,
+        password: password
     };
-    users.push(user)
+    users.push(user);
     return user;
+}
+
+function mutationCreatePost(user_id: number, content: String) {
+    var user = queryUserById(user_id);
+    if (user == undefined) {
+        console.log(`Could not create post, user undefined`);
+        return undefined;
+    }
+    var today = new Date().toLocaleString()
+    var post = {
+        id: generateId(),
+        author: user,
+        comments: [],
+        content: content,
+        createdAt: today,
+        updatedAt: today
+    };
+    posts.push(post);
+    return post;
 }
 
 const resolvers = {
@@ -121,6 +142,10 @@ const resolvers = {
         register: (_, {firstName, lastName, email, password}) => {
             console.log(`Mutation register user with email: \"${email}\"`)
             return mutationRegister(firstName, lastName, email, password);
+        },
+        createPost: (_, {user_id, content}) => {
+            console.log(`Mutation create post by user with id: \"${user_id}\"`);
+            return mutationCreatePost(user_id, content);
         }
     }
 };

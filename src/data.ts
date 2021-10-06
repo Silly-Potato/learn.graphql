@@ -14,8 +14,8 @@ let posts: Object = [
         author: users[0],
         comments: [],
         content: "I am Jerry",
-        createdAt: "11:07:23_06/10/2021",
-        updatedAt: "11:07:23_06/10/2021"
+        createdAt: "06/10/2021, 11:07:23",
+        updatedAt: "06/10/2021, 11:07:23"
     }
 ];
 
