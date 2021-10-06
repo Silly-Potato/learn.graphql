@@ -31,6 +31,7 @@ type Query {
 type Mutation {
     register(firstName: String!, lastName: String, email:String!, password: String): User
     createPost(user_id: Int!, content: String!): Post
+    createComment(user_id: Int!, post_id: Int!, content: String!): Post
 }
 `;
 
@@ -42,9 +43,14 @@ function generateId() {
     return (id_counter);
 }
 
+function mylog(msg: String) {
+    console.log("-----------------------------------------")
+    console.log(msg);
+}
+
+
 function queryById(array, id: number) {
     for (var i: number = 0; i < array.length; i++) {
-        console.log(array[i].id)
         if (array[i].id == id) {
             return array[i]
         }
@@ -112,40 +118,59 @@ function mutationCreatePost(user_id: number, content: String) {
     return post;
 }
 
+function mutationCreateComment(user_id: number, post_id: number, content: String) {
+    var post = queryPostById(post_id);
+    if (post == undefined) {
+        return undefined;
+    }
+    var comment = mutationCreatePost(user_id, content);
+    if (comment == undefined) {
+        return undefined;
+    }
+    console.log(comment)
+    console.log(post)
+    post.comments.push(comment);
+    return comment;
+}
+
 const resolvers = {
     Query: {
         users: () => {
-            console.log(`Query all users`)
+            mylog(`Query all users`)
             return users;
         },
         user: (_, {id}) => {
-            console.log(`Query user with id: \"${id}\"`);
+            mylog(`Query user with id: \"${id}\"`);
             return queryUserById(id);
         },
         posts: () =>  {
-            console.log(`Query all posts`)
+            mylog(`Query all posts`)
             return posts;
         },
         post: (_, {id}) => { 
-            console.log(`Query post with id: \"${id}\"`);
+            mylog(`Query post with id: \"${id}\"`);
             return queryPostById(id);
         },
         comments: (_, {post_id}) => { 
-            console.log(`Query comments from post with id: \"${post_id}\"`);
+            mylog(`Query comments from post with id: \"${post_id}\"`);
             return queryCommentsFromPost(post_id);
         },
         comment: (_, {post_id, comment_id}) => {
-            console.log(`Query comment with id: ${comment_id}, in post with id: \"${post_id}\"`)
+            mylog(`Query comment with id: ${comment_id}, in post with id: \"${post_id}\"`)
             return queryCommentById(post_id, comment_id); }
     },
     Mutation: {
         register: (_, {firstName, lastName, email, password}) => {
-            console.log(`Mutation register user with email: \"${email}\"`)
+            mylog(`Mutation register user with email: \"${email}\"`)
             return mutationRegister(firstName, lastName, email, password);
         },
         createPost: (_, {user_id, content}) => {
-            console.log(`Mutation create post by user with id: \"${user_id}\"`);
+            mylog(`Mutation create post by user with id: \"${user_id}\"`);
             return mutationCreatePost(user_id, content);
+        },
+        createComment: (_, {user_id, post_id, content}) => {
+            mylog(`Mutation create comment by user with id: \"${user_id}\" on post with id: \"${post_id}\"`);
+            return mutationCreateComment(user_id, post_id, content);
         }
     }
 };

@@ -12,10 +12,18 @@ var posts = [
     {
         id: 2,
         author: users[0],
-        comments: [],
+        comments: [
+            {
+                id: 3,
+                author: undefined,
+                content: "woohooooo",
+                createdAt: "the begining of times",
+                updatedAt: "saturday night iirc"
+            }
+        ],
         content: "I am Jerry",
-        createdAt: "11:07:23_06/10/2021",
-        updatedAt: "11:07:23_06/10/2021"
+        createdAt: "06/10/2021, 11:07:23",
+        updatedAt: "06/10/2021, 11:07:23"
     }
 ];
 module.exports = { users: users, posts: posts };
