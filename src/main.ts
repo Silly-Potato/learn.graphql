@@ -167,7 +167,6 @@ function mutationDeletePost(id: number) {
             }
         }
         //delete in post in posts
-        console.log(`${post.id}`)
         if (post.id == id) {
             posts.splice(i, 1)
         }
