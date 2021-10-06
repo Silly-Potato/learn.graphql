@@ -119,7 +119,6 @@ function mutationDeletePost(id) {
                 found = true;
             }
         }
-        console.log("" + post.id);
         if (post.id == id) {
             posts.splice(i, 1);
         }
