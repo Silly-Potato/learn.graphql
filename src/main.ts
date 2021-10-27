@@ -1,5 +1,3 @@
-import { findBreakingChanges } from "graphql";
-
 const { ApolloServer, gql } = require('apollo-server')
 const { users, posts } = require('./data')
 
@@ -15,7 +13,7 @@ type User {
 type Post {
     id: Int
     author: User
-    comments: Post
+    comments: [Post]!
     content: String
     createdAt: String
     updatedAt: String

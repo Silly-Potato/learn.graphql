@@ -1,15 +1,16 @@
 {
-    "compilerOptions": {
-        "module": "CommonJs",
-        //"noImplicitAny": true,
-        "strictNullChecks": true,
-        "removeComments": true,
-        "preserveConstEnums": true,
-        "outDir": "./js/",
-        "sourceMap": true
-    },
-    "files": [
-      "src/main.ts",
-      "src/data.ts"
-    ]
-  }
+  "http.proxySupport": "off",
+  "compilerOptions": {
+    "module": "CommonJs",
+    //"noImplicitAny": true,
+    "strictNullChecks": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "outDir": "./js/",
+    "sourceMap": true
+  },
+  "files": [
+    "src/main.ts",
+    "src/data.ts"
+  ]
+}
